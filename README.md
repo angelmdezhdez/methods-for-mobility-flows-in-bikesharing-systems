@@ -9,3 +9,4 @@ The repository is structured as follows:
 - `src/`: Contains the folders with the code for methods implemented in the thesis.
   - `spk_flows_clustering/`: Code for clustering mobility flows using the Shortest Path Kernel (SPK) method for flows.
   - `dictionary_learning/`: Code for learning the dictionary and the weights of the flows using dictionary learning.
+  - `learned_weights_clustering/`: Code for clustering the learned weights of the flows.
