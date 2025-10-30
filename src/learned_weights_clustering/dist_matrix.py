@@ -1,4 +1,12 @@
-# libraries
+'''
+@author: Antonio Mendez
+@date: June 2025
+'''
+
+##############################################################
+# Libraries
+##############################################################
+
 import os
 import time
 import multiprocessing
@@ -33,7 +41,6 @@ if __name__ == "__main__":
     parser.add_argument('-flows', '--flows', type=str, default=None, help='Path to flows file', required=True)
     parser.add_argument('-sys', '--system', type=str, default='ecobici', help='System to use (ecobici or mibici)', required=False)
     parser.add_argument('-ind', '--indexes', type=str, default='i[0,10]', help='Indexes to use', required=False)
-    parser.add_argument('-trips', '--total_trips', type=str, default=None, help='Path to total trips file', required=False)
     args = parser.parse_args()
 
     # arguments
@@ -50,17 +57,7 @@ if __name__ == "__main__":
     flows = np.load(flows_path, allow_pickle=True)
     total_trips = np.load(trips_path, allow_pickle=True)
 
-    flows_ = flows[indexes]
-    total_trips = total_trips[indexes]
-
-    flows = []
-
-    for i in range(len(flows_)):
-        flow = flows_[i]
-        t = total_trips[i]
-        flows.append(t*flow)
-
-    flows = np.array(flows)
+    flows = flows[indexes]
 
     # kernel matrix
     print('\n\nComputing kernel matrix')
@@ -86,7 +83,7 @@ if __name__ == "__main__":
         plt.imshow(D, cmap='viridis', interpolation='nearest')
         plt.colorbar()
         plt.title('Distance Matrix Heatmap')
-        plt.savefig(os.path.join(directory, 'distance_matrix.pdf'))
+        plt.savefig(os.path.join(directory, 'distance_matrix.pdf'), bbox_inches='tight')
         plt.close()
     else:
         os.makedirs(directory)
@@ -100,5 +97,5 @@ if __name__ == "__main__":
         plt.imshow(D, cmap='viridis', interpolation='nearest')
         plt.colorbar()
         plt.title('Distance Matrix Heatmap')
-        plt.savefig(os.path.join(directory, 'distance_matrix.png'))
+        plt.savefig(os.path.join(directory, 'distance_matrix.pdf'), bbox_inches='tight')
         plt.close()

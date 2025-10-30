@@ -15,8 +15,8 @@ library(dendextend)
 parser <- ArgumentParser(description = "Clustering aglomerativo con matriz de distancias")
 parser$add_argument('-dm', "--distance_matrix", type = "character",
                     help = "Ruta al archivo .npy de la matriz de distancias", required = TRUE)
-parser$add_argument('-dates', '--dates', type = "character",
-                    help = "Fechas a clusterizar (con columna opcional 'labels')", required = FALSE)
+parser$add_argument('-names', '--names', type = "character",
+                    help = "Nombres a clusterizar (con columna opcional 'labels')", required = FALSE)
 parser$add_argument('-odir', "--outdir", type = "character",
                     default = "resultados", help = "Directorio de salida")
 args <- parser$parse_args()
@@ -26,11 +26,11 @@ if (!file.exists(dist_path)) {
   stop("Distance matrix file does not exist: ", dist_path)
 }
 
-dates_path <- args$dates
-if (!is.null(dates_path)) {
-  dates <- read.csv(dates_path, header = TRUE, stringsAsFactors = FALSE)
+names_path <- args$names
+if (!is.null(names_path)) {
+  names <- read.csv(names_path, header = TRUE, stringsAsFactors = FALSE)
 } else {
-  dates <- NULL
+  names <- NULL
 }
 
 output_dir <- args$outdir        
@@ -46,7 +46,7 @@ results_path <- file.path(output_dir, "results.txt")
 results <- file(results_path, open = "w")
 
 cat('Distance matrix path:', dist_path, '\n', file = results)
-cat('Dates path:', dates_path, '\n', file = results)
+cat('names path:', names_path, '\n', file = results)
 cat('Output directory:', output_dir, '\n', file = results)
 
 ##############################################################
@@ -54,16 +54,13 @@ cat('Output directory:', output_dir, '\n', file = results)
 ##############################################################
 
 start_time <- Sys.time()
-
-# CAMBIO: cargar la matriz de distancias directamente
 D <- npyLoad(dist_path)
 
-if (is.null(dates)) {
-  # CAMBIO: corregido nombre de columna a "dates" (antes causaba error)
-  dates <- data.frame(dates = 1:nrow(D))
+if (is.null(names)) {
+  names <- data.frame(names = 1:nrow(D))
 }
 
-rownames(D) <- dates$dates
+rownames(D) <- names$names
 
 if (nrow(D) != ncol(D)) {
   stop("Distance matrix must be square.")
@@ -89,17 +86,18 @@ for (k in 2:(n_ - 1)) {
   npySave(ruta_etiquetas, etiquetas)
 }
 
-write.csv(dates, file = file.path(output_dir, "dates.csv"), row.names = FALSE)
+write.csv(names, file = file.path(output_dir, "names.csv"), row.names = FALSE)
 
 ##########################################################
 # Dendrograma coloreado por etiquetas (si existen)
 ##########################################################
 
 pdf(file = file.path(output_dir, "dendrogram_colored.pdf"), width = 18, height = 12)
+par(mar = c(1, 1, 1, 1), oma = c(0, 0, 0, 0))
 
 # Si existe la columna "labels", usamos colores
-if ("labels" %in% colnames(dates)) {
-  labels_factor <- as.factor(dates$labels)
+if ("labels" %in% colnames(names)) {
+  labels_factor <- as.factor(names$labels)
   colores <- rainbow(length(levels(labels_factor)))
   names(colores) <- levels(labels_factor)
   
@@ -108,12 +106,12 @@ if ("labels" %in% colnames(dates)) {
     set("labels_cex", 0.8)
   
   plot(dhc,
-       main = "Aglomerative clustering dendrogram",
+       main = "",
        xlab = "", sub = "")
   
 } else {
   plot(dhc,
-       main = "Aglomerative clustering dendrogram",
+       main = "",
        xlab = "", sub = "",
        cex = 0.8)
 }

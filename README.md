@@ -59,8 +59,48 @@ The code in `train_dict.py` learns a dictionary of atoms and the corresponding w
 - `--tolerance`: (float) Tolerance for early stopping (default: 1e-4).
 - `--patience`: (int) Patience for early stopping (default: 15).
 
-You can run the script as follows (example) with the conda environment activated (env_py1 or env_py2):
+You can run the script as follows (example) with the conda environment activated (env_py2):
 ```bash
 python3 train_dict.py -dir ./results/ -flows ./data/ecobici_flows.npy -lap ./data/ecobici_laplacian.npy -natoms 20 -ep 1000 -reg l1 -lambda 0.01 -smooth 1 --gamma 0.1 -as 100 -ds 100 -lr 0.0001 -bs 32 -tol 0.0001 -pat 15
 ```
-After running the script, the learned dictionary and weights will be saved in the specified directory in .npy format, along with plots of the loss over epochs and some reconstructed flows as .pdf files.
+After running the script, the learned dictionary and weights will be saved in the specified directory in .npy format, along with plots of the loss over epochs and some reconstructed flows as .pdf files. Also, a .txt file with the parameters used during training will be saved.
+
+In the same folder, you will find the script `test_dict.py`, which allows you to test a pre-trained dictionary on new flow data. This script requires the following arguments:
+- `--directory`: (string) Path to save results.
+- `--flows`: (string) Path to the file containing the new flows data (.npy).
+- `--dictionary`: (string) Path to the pre-trained dictionary file (.npy).
+- `--regularization`: (string) Type of regularization to use ('l1' or 'l2').
+- `--lambda_reg`: (float) Regularization parameter.
+- `--alpha_steps`: (int) Number of steps for the weight update (default: 100).
+- `--learning_rate`: (float) Learning rate for the optimizer (default: 1e-4).
+- `--batch_size`: (int) Batch size for testing (default: 32).
+
+As you can see, there is not need to provide the Laplacian or the number of atoms since the dictionary is already learned.
+You can run the script as follows (example) with the conda environment activated (env_py2):
+```bash
+python3 test_dict.py -dir ./results/ -flows ./data/new_ecobici_flows.npy -dict ./results/learned_dictionary.npy -reg l1 -lambda 0.01 -as 100 -lr 0.0001 -bs 32
+```
+After running the script, the reconstructed flows and weights will be saved in the specified directory in .npy format, along with plots of the loss over epochs and some reconstructed flows as .pdf files. Also, a .txt file with the parameters used during testing will be saved.
+
+## Clustering for learned weights
+The `src/learned_weights_clustering/` folder contains the implementation of clustering for the learned weights obtained from the dictionary learning method. In fact, the idea is the same as in the SPK clustering, but now we use the weights as features to cluster the flows. So, the first script `dist_matrix.py` computes the distance matrix using the learned weights. This script requires the following arguments:
+- `--directory`: (string) Path to save results.
+- `--flows`: (string) Path to the file containing the learned weights data (.npy).
+- `--system`: (string) The bikesharing system to use: 'ecobici' or 'mibici' (default: 'ecobici').
+- `--indexes`: (string) Indexes of the flows to consider. You can indicates as '[$a_1, a_2, ..., a_n$]' that is uniquely the indexes indicated or 'i[$a_1, a_2$]' that means the range since $a_1$ to $a_2$ (default: 'i[0,10]').
+
+You can run the script as follows (example) with the conda environment activated (env_py1 or env_py2):
+```bash
+python3 dist_matrix.py -dir ./results/ -flows ./data/learned_weights.npy --system ecobici --indexes i[0,100]
+```
+After running the script, the distance matrix will be saved in the specified directory in .npy format, as well as a .txt file with the parameters used and a heatmap of the distance matrix as a .pdf file. Also a pdf file with the heatmap of the distance matrix will be saved.
+
+The script `w_aglo_clustering.r` performs agglomerative clustering on the distance matrix. This script requires the same arguments as the previous R script for SPK clustering: 
+- `--distance_matrix`: (string) Path to the distance matrix file (.npy format).
+- `--names`: (string) Path to the names file of each object to cluster in format .CSV (optional, can contain a 'labels' to color the names in the dendrogram accordingly to a class).
+- `--outdir`: (string) Path to save results.
+You can run the script as follows (example) with the conda environment activated (env_r):
+```bash
+Rscript w_aglo_clustering.r -dm ./results/distance_matrix.npy -names ./data/flow_names.csv -odir ./results/
+```
+This will generate the dendrogram plot saved as a .pdf file in the specified output directory as well as .npy files containing the cluster labels for different numbers of possible clusters.

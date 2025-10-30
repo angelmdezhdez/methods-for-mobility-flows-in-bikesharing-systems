@@ -3,6 +3,9 @@
 @date: May 2025
 '''
 
+# =============================
+# Libraries
+# =============================
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -63,7 +66,6 @@ def optimize_alpha_batches(D, alpha_params, flow_loader, T, k, lambda_reg, devic
             batch_alpha = alpha_params[idx]
 
             recon = torch.matmul(D, batch_alpha)
-            #recon = softmax_transform(recon)  # Ensure reconstruction is in [0,1]^d
             loss_rec = ((batch - recon) ** 2).sum()
 
             if regularization == 'l2':
@@ -79,9 +81,9 @@ def optimize_alpha_batches(D, alpha_params, flow_loader, T, k, lambda_reg, devic
         total_loss.backward()
         optimizer.step()
 
-        # Projection [0,1]^d
+        # Projection [0,infinity)^d
         with torch.no_grad():
-            alpha_params.clamp_(0.0, 1.0)
+            alpha_params.clamp_(min=0.0)
 
     with torch.no_grad():
         for batch, idx in flow_loader:
@@ -155,7 +157,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Dictionary Learning for Arrival Flows')
     parser.add_argument('-dir', '--directory', type=str, default=None, help='Directory to save results', required=False)
-    parser.add_argument('-system', '--system_key', type=str, default='experiment', help='system of flows', required=True)
     parser.add_argument('-flows', '--flows', type=str, default='flows.npy', help='Path to the flow tensor file', required=True)
     parser.add_argument('-dict', '--dictionary', type=str, default='dictionary.npy', help='Path to the dictionary file', required=True)
     parser.add_argument('-reg', '--regularization', type=str, default='l2', help='which regularization', required=True)
@@ -166,7 +167,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     directory = args.directory
-    system = args.system_key
     flow_path = args.flows
     dictionary_path = args.dictionary
     lambda_reg = args.lambda_reg
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     regularization = args.regularization
 
-    print(f"System: {system}")
+    print('Directory:', directory)
     sys.stdout.flush()
     print(f"Flows: {flow_path}")
     sys.stdout.flush()
@@ -209,15 +209,12 @@ if __name__ == '__main__':
     sys.stdout.flush()
     
 
-    if directory is not None:
-        save_dir = os.path.join(directory, f'results_{system}')
-    else:      
-        save_dir = f'results_{system}'
+    save_dir = directory if directory is not None else f'results/test_{regularization}_lambda{lambda_reg}_as{alpha_steps}_lr{lr}_bs{batch_size}'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     file_params = open(os.path.join(save_dir, 'params_test.txt'), 'w')
-    file_params.write(f"system: {system}\n")
+    file_params.write(f"directory: {directory}\n")
     file_params.write(f"flows: {flow_path}\n")
     file_params.write(f"number epochs that was required: {len(loss)}\n")
     file_params.write(f"regularization: {regularization}\n")
@@ -231,7 +228,7 @@ if __name__ == '__main__':
 
     np.save(os.path.join(save_dir, 'weights_test.npy'), alpha.cpu().numpy())
 
-    indexes = [10, 50, 180, 270, 350]
+    indexes = range(0, len(alpha), max(1, len(alpha)//5))
 
     flows = np.load(flow_path, allow_pickle=True)
     dictionary = np.load(dictionary_path, allow_pickle=True)
@@ -253,6 +250,3 @@ if __name__ == '__main__':
 
     print('Finished')
     sys.stdout.flush()
-
-
-os.system(f'curl -d "Finishing test with {system}" ntfy.sh/aamh_091099_ntfy')

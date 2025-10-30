@@ -72,7 +72,6 @@ def optimize_alpha_batches(D, alpha_params, flow_loader, T, k, lambda_reg, devic
             batch_alpha = alpha_params[idx]
 
             recon = torch.matmul(D, batch_alpha)
-            #recon = softmax_transform(recon)  # Ensure reconstruction is in [0,1]^d
             loss_rec = ((batch - recon) ** 2).sum()
 
             if regularization == 'l2':
@@ -88,9 +87,9 @@ def optimize_alpha_batches(D, alpha_params, flow_loader, T, k, lambda_reg, devic
         total_loss.backward()
         optimizer.step()
 
-        # Projection [0,1]^d
+        # Projection [0,infinity)^d
         with torch.no_grad():
-            alpha_params.clamp_(0.0, 1.0)
+            alpha_params.clamp_(min=0.0)
 
     with torch.no_grad():
         for batch, idx in flow_loader:
