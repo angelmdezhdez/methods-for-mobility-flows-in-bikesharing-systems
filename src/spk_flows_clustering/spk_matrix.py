@@ -200,7 +200,6 @@ def make_kernel(sigma):
 
 if __name__ == "__main__":
     multiprocessing.set_start_method("fork")
-    # python3 spk_matrix.py -dir spk_kmeans -flows data_mibici_2018_4/flows.npy -sys mibici -ind 'i[2,12]'
     parser = argparse.ArgumentParser(description="SP Kernel Matrix")
     parser.add_argument('-dir', '--directory', type=str, default=None, help='Directory to save results', required=False)
     parser.add_argument('-flows', '--flows', type=str, default=None, help='Path to flows file', required=True)
@@ -285,13 +284,15 @@ if __name__ == "__main__":
             f.write(f'flows dir: {flows_path}\n')
             f.write(f'sigma: {s}\n')
             f.write(f'indexes: {indexes}\n')
-            f.write(f'time: {elapsed_time/60:.2f} minutes\n')
+            if elapsed_time < 60:
+                f.write(f'time: {elapsed_time:.2f} seconds\n')
+            else:
+                f.write(f'time: {elapsed_time/60:.2f} minutes\n')
             f.write(f'normalized: {normalized}\n')
         plt.figure(figsize=(10, 8))
         plt.imshow(K, cmap='viridis', interpolation='nearest')
         plt.colorbar()
-        plt.title('Kernel Matrix Heatmap')
-        plt.savefig(os.path.join(directory, 'kernel_matrix.png'))
+        plt.savefig(os.path.join(directory, 'kernel_matrix.pdf'), bbox_inches='tight')
         plt.close()
     else:
         os.makedirs(directory)
@@ -301,11 +302,13 @@ if __name__ == "__main__":
             f.write(f'flows dir: {flows_path}\n')
             f.write(f'sigma: {s}\n')
             f.write(f'indexes: {indexes}\n')
-            f.write(f'time: {elapsed_time/60:.2f} minutes\n')
+            if elapsed_time < 60:
+                f.write(f'time: {elapsed_time:.2f} seconds\n')
+            else:
+                f.write(f'time: {elapsed_time/60:.2f} minutes\n')
             f.write(f'normalized: {normalized}\n')
         plt.figure(figsize=(10, 8))
         plt.imshow(K, cmap='viridis', interpolation='nearest')
         plt.colorbar()
-        plt.title('Kernel Matrix Heatmap')
-        plt.savefig(os.path.join(directory, 'kernel_matrix.png'))
+        plt.savefig(os.path.join(directory, 'kernel_matrix.pdf'), bbox_inches='tight')
         plt.close()
