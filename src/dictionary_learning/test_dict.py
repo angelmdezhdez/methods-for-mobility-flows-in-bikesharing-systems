@@ -1,3 +1,8 @@
+'''
+@author: Antonio Mendez
+@date: May 2025
+'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 import torch

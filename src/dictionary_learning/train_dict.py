@@ -1,3 +1,11 @@
+'''
+@author: Antonio Mendez
+@date: May 2025
+'''
+
+# =============================
+# Libraries
+# =============================
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -261,11 +269,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Dictionary Learning for Arrival Flows')
     parser.add_argument('-dir', '--directory', type=str, default=None, help='Directory to save results', required=False)
-    parser.add_argument('-system', '--system_key', type=str, default='experiment', help='system of flows', required=True)
     parser.add_argument('-flows', '--flows', type=str, default='flows.npy', help='Path to the flow tensor file', required=True)
     parser.add_argument('-lap', '--laplacian', type=str, default='laplacian.npy', help='Path to the laplacian file', required=True)
     parser.add_argument('-natoms', '--number_atoms', type=int, default=10, help='Number of dictionary elements', required=True)
-    parser.add_argument('-ep', '--epochs', type=int, default=10, help='Number of epochs', required=True)
+    parser.add_argument('-ep', '--epochs', type=int, default=1000, help='Number of epochs', required=True)
     parser.add_argument('-reg', '--regularization', type=str, default='l2', help='which regularization', required=True)
     parser.add_argument('-lambda', '--lambda_reg', type=float, default=0.01, help='regularization parameter', required=True)
     parser.add_argument('-smooth', '--smooth', type=int, default=0, help='smoothness 1(True)/0(False)', required=True)
@@ -279,7 +286,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     directory = args.directory
-    system = args.system_key
     flow_path = args.flows
     lap_path = args.laplacian
     k = args.number_atoms
@@ -295,7 +301,7 @@ if __name__ == '__main__':
     tol = args.tolerance
     patience = args.patience
 
-    print(f"System: {system}")
+    print(f"Directory: {directory}")
     sys.stdout.flush()
     print(f"Flows: {flow_path}")
     sys.stdout.flush()
@@ -351,15 +357,12 @@ if __name__ == '__main__':
     print('Mean time per epoch: {:.2f} seconds'.format((end - start) / n_epochs))
     sys.stdout.flush()
 
-    if directory is not None:
-        save_dir = os.path.join(directory, f'results_{system}')
-    else:      
-        save_dir = f'results_{system}'
+    save_dir = directory if directory is not None else 'results_dictionary_learning'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
 
-    indexes = [3, 416, 843, 1253, 1669]
+    indexes = range(0, len(alpha), max(1, len(alpha)//5))
 
     F = np.load(flow_path)
     weights = alpha.cpu().numpy()
@@ -379,13 +382,12 @@ if __name__ == '__main__':
         plt.imshow(reconstructed_flow, cmap='viridis', aspect='auto')
         plt.colorbar()
         plt.tight_layout()
-        plt.savefig(os.path.join(save_dir, f'reconstruction_{index}.png'))
+        plt.savefig(os.path.join(save_dir, f'reconstruction_{index}.pdf'), bbox_inches='tight')
         plt.close()
 
     D_s = D.cpu().numpy().shape
 
     file_params = open(os.path.join(save_dir, 'params.txt'), 'w')
-    file_params.write(f"system: {system}\n")
     file_params.write(f'number of nodes: {D_s[0]}\n')
     file_params.write(f"flows: {flow_path}\n")
     file_params.write(f"laplacian: {lap_path}\n")
@@ -417,11 +419,8 @@ if __name__ == '__main__':
     plt.ylabel('Loss')
     plt.title('Loss over epochs')
     plt.grid()
-    plt.savefig(os.path.join(save_dir, 'loss_plot.png'))
+    plt.savefig(os.path.join(save_dir, 'loss_plot.pdf'), bbox_inches='tight')
     plt.close()
 
     print('Finished')
     sys.stdout.flush()
-
-
-#os.system('curl -d "Terminé de entrenar" ntfy.sh/aamh_091099_ntfy')

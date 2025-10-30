@@ -39,3 +39,28 @@ Rscript ker_aglo_clustering.r -km ./results/kernel_matrix.npy -names ./data/flow
 ```
 
 This will generate the dendrogram plot saved as a .pdf file in the specified output directory as well as .npy files containing the cluster labels for different numbers of possible clusters.
+
+## Dictionary learning for mobility flows
+The `src/dictionary_learning/` folder contains the implementation of dictionary learning for mobility flows in bikesharing systems. 
+The code in `train_dict.py` learns a dictionary of atoms and the corresponding weights for representing the flows. This script requires the following arguments:
+- `--directory`: (string) Path to save results.
+- `--flows`: (string) Path to the file containing the flows data (.npy).
+- `--laplacian`: (string) Path to the file containing the graph Laplacian (.npy).
+- `--number_atoms`: (int) Number of dictionary atoms to learn.
+- `--epochs`: (int) Number of training epochs (default: 1000).
+- `--regularization`: (string) Type of regularization to use ('l1' or 'l2').
+- `--lambda_reg`: (float) Regularization parameter.
+- `--smooth`: (int) Boolean value indicating whether to use smoothness regularization (1 for True, 0 for False).
+- `--gamma_reg`: (float) Smoothness regularization parameter (default: 0.1).
+- `--alpha_steps`: (int) Number of steps for the weight update (default: 100).
+- `--dict_steps`: (int) Number of steps for the dictionary update (default: 100).
+- `--learning_rate`: (float) Learning rate for the optimizer (default: 1e-4).
+- `--batch_size`: (int) Batch size for training (default: 32).
+- `--tolerance`: (float) Tolerance for early stopping (default: 1e-4).
+- `--patience`: (int) Patience for early stopping (default: 15).
+
+You can run the script as follows (example) with the conda environment activated (env_py1 or env_py2):
+```bash
+python3 train_dict.py -dir ./results/ -flows ./data/ecobici_flows.npy -lap ./data/ecobici_laplacian.npy -natoms 20 -ep 1000 -reg l1 -lambda 0.01 -smooth 1 --gamma 0.1 -as 100 -ds 100 -lr 0.0001 -bs 32 -tol 0.0001 -pat 15
+```
+After running the script, the learned dictionary and weights will be saved in the specified directory in .npy format, along with plots of the loss over epochs and some reconstructed flows as .pdf files.
