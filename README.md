@@ -8,6 +8,7 @@ The repository is structured as follows:
 - `envs/`: Contains the conda environment files for setting up the required dependencies.
 - `src/`: Contains the folders with the code for methods implemented in the thesis.
   - `spk_flows_clustering/`: Code for clustering mobility flows using the Shortest Path Kernel (SPK) method for flows.
+  - `abstract_flows/`: Code for abstracting mobility flows. This is a modified version of the method proposed in "Abstracting mobility flows from bike-sharing systems" by Kon et al. (2021).
   - `dictionary_learning/`: Code for learning the dictionary and the weights of the flows using dictionary learning.
   - `learned_weights_clustering/`: Code for clustering the learned weights of the flows.
 - `data/`: Contains data files.
@@ -39,6 +40,9 @@ Rscript ker_aglo_clustering.r -km ./results/kernel_matrix.npy -names ./data/flow
 ```
 
 This will generate the dendrogram plot saved as a .pdf file in the specified output directory as well as .npy files containing the cluster labels for different numbers of possible clusters.
+
+## Abstracting mobility flows
+
 
 ## Dictionary learning for mobility flows
 The `src/dictionary_learning/` folder contains the implementation of dictionary learning for mobility flows in bikesharing systems. 
@@ -104,3 +108,6 @@ You can run the script as follows (example) with the conda environment activated
 Rscript w_aglo_clustering.r -dm ./results/distance_matrix.npy -names ./data/flow_names.csv -odir ./results/
 ```
 This will generate the dendrogram plot saved as a .pdf file in the specified output directory as well as .npy files containing the cluster labels for different numbers of possible clusters.
+
+# References
+- Kon, F., Ferreira, É. C., De Souza, H. A., Duarte, F., Santi, P., & Ratti, C. (2021). Abstracting mobility flows from bike-sharing systems. Public Transport, 14(3), 545-581. https://doi.org/10.1007/s12469-020-00259-5
