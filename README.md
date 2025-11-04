@@ -42,8 +42,10 @@ Rscript ker_aglo_clustering.r -km ./results/kernel_matrix.npy -names ./data/flow
 This will generate the dendrogram plot saved as a .pdf file in the specified output directory as well as .npy files containing the cluster labels for different numbers of possible clusters.
 
 ## Abstracting mobility flows
-
-
+The `src/abstract_flows/` folder contains the implementation and modification of the method proposed in "Abstracting mobility flows from bike-sharing systems" by Kon et al. (2021). 
+In `arrow.py` you will find the code to create the arrows that represent the flows in a bikesharing system. This arrows are plotted in a Folium map. 
+The script `grid.py` creates a grid over the area of interest and aggregates the flows into the grid cells. There are functions to create the grid, and all the information about the grid.
+The script `flows.py` contains functions to process the flows data, and also the functions to plot the flows in a Folium map using the arrows created in `arrow.py`.
 ## Dictionary learning for mobility flows
 The `src/dictionary_learning/` folder contains the implementation of dictionary learning for mobility flows in bikesharing systems. 
 The code in `train_dict.py` learns a dictionary of atoms and the corresponding weights for representing the flows. This script requires the following arguments:
